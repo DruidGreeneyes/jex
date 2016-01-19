@@ -1,25 +1,45 @@
-package jex.core;
+package rivet.program;
 
-import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.Reader;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.List;
 
-/** class REPL.
-*/
+
+import static java.util.stream.Collectors.toList;
+
 public final class REPL {
 
-   public static void main(final String[] args) throws Exception {
+	public static void main(String[] args) {
+		List<Method> methodIndex = 
+				Arrays.stream(Program.class.getMethods())
+				.filter((m) -> Modifier.isPublic(m.getModifiers()))
+				.collect(toList());
+		String res;
+		if (args.length > 0) {
+			System.out.println("Attempting to evaluate single command...");
+			res = Loop.eval(args, methodIndex);
+		} else {
+			try (Reader input = System.console().reader()) {
+				System.out.println("Attempting to start repl...");
+				res = repl(input, methodIndex);
+			} catch (IOException e) {
+				e.printStackTrace();
+				res = "ERROR!";
+			} 
+		}
+		System.out.println(res);
+	}
 
-   }
-
-   public static void repl (final Reader reader) {
-      try (final BufferedReader input = new BufferedReader(reader)) {
-         while(true) {
-            final Pair<String, Boolean> print = new Loop(input).run();
-            if (print.right == false) break;
-            else System.out.println(print.left);
-         }
-      } catch (final IOException e) {
-         e.printStackTrace();
-      }
-   }
+	public static String repl (final Reader input, final List<Method> methodIndex) {
+		System.out.println("Entering Repl loop...");
+		while(true) {
+			final Pair<String, Boolean> print = new Loop(input, methodIndex).run(true);
+			if (print.right() == false) break;
+			else System.out.println(print.left());
+		}
+		return "wHEEEEEE!";
+	}
 }

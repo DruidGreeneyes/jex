@@ -1,37 +1,44 @@
-package jex.core;
+package rivet.program;
 
 import java.lang.StringBuffer;
-import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Reader;
 
 public final class ReadTable {
-   private final StringBuffer buffer;
-   private final BufferedReader input;
-   /** Constructor. */
-   public ReadTable(BufferedReader input) {
-      this.buffer = new StringBuffer();
-      this.input = input;
-   }
+	private StringBuffer buffer;
+	private final Reader input;
+	/** Constructor. */
+	public ReadTable(Reader input) {
+		this.buffer = new StringBuffer();
+		this.input = input;
+	}
 
-    public Boolean read(BufferedReader input) {
-       int i = -1;
-       try {
-          i = input.read();
-       } catch (IOException e) {
-          e.printStackTrace();
-       }
-       if (i == -1)
-          return false;
-       else {
-          this.put((char) i);
-          return true;
-       }
-    }
+	public Boolean read() {
+		int i = -1;
+		try {
+			i = input.read();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if (i == -1)
+			return false;
+		else {
+			char c = (char) i;
+			if (c != '\n')
+				this.put((char) i);
+			return true;
+		}
+	}
 
-    public String get() {return this.buffer.toString();}
+	public char current() {
+		return this.buffer.charAt(buffer.length() - 1);
+	}
 
-    public void put(Object object) {this.buffer.append(object);}
+	public String get() {return buffer.toString();}
 
-    public void clear() {this.buffer.delete(0);}
+	public void put(Object object) {buffer.append(object);}
 
-    public BufferedReader reader() {return this.input;}
+	public void clear() {buffer = new StringBuffer();}
+
+	public Reader reader() {return input;}
 }
